@@ -8,27 +8,29 @@ workflows:
     max_build_duration: 60
     environment:
       flutter: stable
+      java_version: 17
       groups:
-        - keystore_credentials # Ensure this group exists in Environment variables
+        - keystore_credentials # This group should contain your keystore variables
         - supabase_credentials
     scripts:
       - name: Set up local.properties
         script: echo "flutter.sdk=$FLUTTER_ROOT" > "$CM_BUILD_DIR/android/local.properties"
-      - name: Set up Android keystore
+      - name: Set up Android keystore from custom environment variables
         script: |
-          # This script decodes the base64 keystore and creates the key.properties file
-          echo $CM_KEYSTORE | base64 --decode > /tmp/keystore.jks
+          echo "Decoding keystore from MY_KEYSTORE_BASE64..."
+          echo $MY_KEYSTORE_BASE64 | base64 --decode > /tmp/keystore.jks
+          echo "Creating key.properties file..."
           cat > "$CM_BUILD_DIR/android/key.properties" <<EOF
           storeFile=/tmp/keystore.jks
-          storePassword=$CM_STORE_PASSWORD
-          keyPassword=$CM_KEY_PASSWORD
-          keyAlias=$CM_KEY_ALIAS
+          storePassword=$MY_STORE_PASSWORD
+          keyPassword=$MY_KEY_PASSWORD
+          keyAlias=$MY_KEY_ALIAS
           EOF
+          echo "key.properties file created successfully."
       - name: Get Flutter packages
         script: flutter packages pub get
       - name: Replace Supabase credentials
         script: |
-          # Find and replace the placeholder keys in main.dart with secure environment variables
           sed -i.bak "s|PLACEHOLDER_SUPABASE_URL|$SUPABASE_URL|g" "lib/main.dart"
           sed -i.bak "s|PLACEHOLDER_SUPABASE_ANON_KEY|$SUPABASE_ANON_KEY|g" "lib/main.dart"
       - name: Build Android release APK
