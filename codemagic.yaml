@@ -1,0 +1,44 @@
+# codemagic.yaml
+# For more information about this file, see https://docs.codemagic.io/yaml-basic-configuration/
+
+workflows:
+  android-app-build:
+    name: Android Release Build
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      android_signing:
+        - keystore_credentials
+      groups:
+        - supabase_credentials
+    scripts:
+      - name: Set up local.properties
+        script: echo "flutter.sdk=$FLUTTER_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Set up Android keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > /tmp/keystore.jks
+          cat > "$CM_BUILD_DIR/android/key.properties" <<EOF
+          storeFile=/tmp/keystore.jks
+          storePassword=$CM_STORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          EOF
+      - name: Get Flutter packages
+        script: flutter packages pub get
+      - name: Replace Supabase credentials
+        script: |
+          # Find and replace the placeholder keys in main.dart with secure environment variables
+          sed -i.bak "s|PLACEHOLDER_SUPABASE_URL|$SUPABASE_URL|g" "lib/main.dart"
+          sed -i.bak "s|PLACEHOLDER_SUPABASE_ANON_KEY|$SUPABASE_ANON_KEY|g" "lib/main.dart"
+      - name: Build Android release APK
+        script: flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
+    publishing:
+      email:
+        recipients:
+          - tips.waiyanhtet@gmail.com
+        notify:
+          success: true
+          failure: true

@@ -6,8 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://oooxblbjqqvlcvyoqiop.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vb3hibGJqcXF2bGN2eW9xaW9wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0MzkwMTUsImV4cCI6MjA4NzAxNTAxNX0.d7Di6fIxWfKxFiq2JJTnYpf6IPGtga033KnG_EQN2JA',
+  );
+
   runApp(const MyApp());
 }
 
@@ -54,7 +62,7 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Audio book',
+      title: 'ULife App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: primaryColor,
