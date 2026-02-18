@@ -32,9 +32,6 @@ workflows:
           echo "key.properties file created successfully."
       - name: Get Flutter packages
         script: flutter packages pub get
-      - name: Fix flutter_credit_card namespace issue
-        script: |
-          sed -i.bak 's/compileSdkVersion 33/namespace "com.github.SimformSolutionsPvtLtd.flutter_credit_card"\n    compileSdkVersion 33/' "$HOME/.pub-cache/hosted/pub.dev/flutter_credit_card-4.0.1/android/build.gradle"
       - name: Replace Supabase credentials
         script: |
           sed -i.bak "s|PLACEHOLDER_SUPABASE_URL|$SUPABASE_URL|g" "lib/main.dart"
